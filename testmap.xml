@@ -1,8 +1,16 @@
 <map>
-    <streets>
-
-    </streets>
     <inter>
-
+        <intersec id="1">
+            <connection>2</connection>
+        </intersec>
+        <intersec id="0002">
+            <connection>3</connection>
+        </intersec>
+        <intersec id="0003">
+            <connection>1</connection>
+        </intersec>
+        <intersec id="0004">
+            <connection>1</connection>
+        </intersec>
     </inter>
 </map>
