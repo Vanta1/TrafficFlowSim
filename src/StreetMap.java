@@ -1,3 +1,5 @@
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import javax.xml.XMLConstants;
@@ -6,7 +8,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.w3c.dom.Document;
@@ -35,11 +36,21 @@ public class StreetMap {
                                 .getNamedItem("id")
                                 .getNodeValue()
                 )));
+                System.out.println(this.intersections.get(i).getId());
+                NodeList connections = docIntersections.item(i).getChildNodes();
+                for (int n = 0; n < connections.getLength(); n++) {
+                    if (connections.item(n).getNodeType() != Node.ELEMENT_NODE)
+                        continue;
+                    Element curElement = (Element) connections.item(n);
+                    Node nls = curElement.getElementsByTagName("target").item(0).getChildNodes().item(0);
+                    System.out.println(nls.getNodeValue());
+                    this.intersections.get(i).addConnection(Integer.parseInt(nls.getNodeValue()));
+                    // TODO make this filter work: if (this.streets.stream().filter(street -> !street.getConnections().equals()))
+                    int[] toTemp = {this.intersections.get(i).getId(), Integer.parseInt(nls.getNodeValue())};
+                    this.streets.add(new Street(1, toTemp));
+                }
             }
-
-
-        } catch (ParserConfigurationException | SAXException |
-                IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
 

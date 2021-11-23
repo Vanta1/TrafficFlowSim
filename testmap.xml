@@ -1,16 +1,28 @@
 <map>
     <inter>
+        <intersec id="0">
+            <connection>
+                <target>2</target>
+                <length>3</length>
+            </connection>
+        </intersec>
         <intersec id="1">
-            <connection>2</connection>
+            <connection>
+                <target>3</target>
+                <length>3</length>
+            </connection>
         </intersec>
-        <intersec id="0002">
-            <connection>3</connection>
+        <intersec id="2">
+            <connection>
+                <target>4</target>
+                <length>3</length>
+            </connection>
         </intersec>
-        <intersec id="0003">
-            <connection>1</connection>
-        </intersec>
-        <intersec id="0004">
-            <connection>1</connection>
+        <intersec id="3">
+            <connection>
+                <target>1</target>
+                <length>3</length>
+            </connection>
         </intersec>
     </inter>
 </map>
