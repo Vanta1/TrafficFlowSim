@@ -14,8 +14,23 @@ import org.w3c.dom.Document;
 
 public class StreetMap {
     Car[] cars;
-    ArrayList<Street> streets = new ArrayList<Street>();
     ArrayList<Intersection> intersections = new ArrayList<Intersection>();
+
+    public Intersection getInterecionById(int id) {
+        for (Intersection intersection : intersections) {
+            if (intersection.getId() == id) {
+                return intersection;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Integer> calculateRoute(int startId, int endId) {
+        ArrayList<Integer> route = new ArrayList<>();
+        Intersection start = this.getInterecionById(startId);
+
+        return route;
+    }
 
     public StreetMap(String mapFile, int numCars) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -27,8 +42,6 @@ public class StreetMap {
 
             NodeList docIntersections = document.getElementsByTagName("intersec");
 
-            // TODO: constructing graph with streets
-
             for (int i = 0; i < docIntersections.getLength(); i++) {
                 this.intersections.add(new Intersection(Integer.parseInt( // add an intersection for each intersection in xml file
                         docIntersections.item(i)
@@ -36,18 +49,15 @@ public class StreetMap {
                                 .getNamedItem("id")
                                 .getNodeValue()
                 )));
-                System.out.println(this.intersections.get(i).getId());
                 NodeList connections = docIntersections.item(i).getChildNodes();
                 for (int n = 0; n < connections.getLength(); n++) {
                     if (connections.item(n).getNodeType() != Node.ELEMENT_NODE)
                         continue;
                     Element curElement = (Element) connections.item(n);
-                    Node nls = curElement.getElementsByTagName("target").item(0).getChildNodes().item(0);
-                    System.out.println(nls.getNodeValue());
-                    this.intersections.get(i).addConnection(Integer.parseInt(nls.getNodeValue()));
-                    // TODO make this filter work: if (this.streets.stream().filter(street -> !street.getConnections().equals()))
-                    int[] toTemp = {this.intersections.get(i).getId(), Integer.parseInt(nls.getNodeValue())};
-                    this.streets.add(new Street(1, toTemp));
+                    Node targetNode = curElement.getElementsByTagName("target").item(0).getChildNodes().item(0);
+                    Node lengthNode = curElement.getElementsByTagName("length").item(0).getChildNodes().item(0);
+                    int[] conTemp = {Integer.parseInt(targetNode.getNodeValue()), Integer.parseInt(lengthNode.getNodeValue())};
+                    this.intersections.get(i).addConnection(conTemp);
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
