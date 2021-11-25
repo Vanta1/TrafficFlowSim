@@ -25,12 +25,29 @@ public class StreetMap {
         return null;
     }
 
+    /* TODO: pathfinding function here
     public ArrayList<Integer> calculateRoute(int startId, int endId) {
         ArrayList<Integer> route = new ArrayList<>();
         Intersection start = this.getInterecionById(startId);
+        ArrayList<Intersection> openConnections = new ArrayList<>();
+        ArrayList<Intersection> closedConnections = new ArrayList<>();
+
+        openConnections.add(start);
+
+        while (!openConnections.isEmpty()) {
+            Intersection current = openConnections.get(0);
+            int currentIndex = 0;
+
+            for (int i = 0; i < openConnections.size(); i++) {
+                if () {
+
+                }
+            }
+        }
 
         return route;
     }
+    */
 
     public StreetMap(String mapFile, int numCars) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();

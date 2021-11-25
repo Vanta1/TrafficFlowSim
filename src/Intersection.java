@@ -15,4 +15,7 @@ public class Intersection {
     public void addConnection(int[] con) {
         this.connections.add(con);
     }
+    public ArrayList<int[]> getConnections() {
+        return connections;
+    }
 }
