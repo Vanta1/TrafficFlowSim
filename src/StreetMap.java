@@ -25,31 +25,19 @@ public class StreetMap {
         return null;
     }
 
-    /* TODO: pathfinding function here
+    // TODO: pathfinding function here
     public ArrayList<Integer> calculateRoute(int startId, int endId) {
-        ArrayList<Integer> route = new ArrayList<>();
-        Intersection start = this.getInterecionById(startId);
-        ArrayList<Intersection> openConnections = new ArrayList<>();
-        ArrayList<Intersection> closedConnections = new ArrayList<>();
+        ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
+        nodes.add(new IntersectionAsNode(startId, 0, -1));
+        while (true) {
 
-        openConnections.add(start);
 
-        while (!openConnections.isEmpty()) {
-            Intersection current = openConnections.get(0);
-            int currentIndex = 0;
-
-            for (int i = 0; i < openConnections.size(); i++) {
-                if () {
-
-                }
-            }
         }
-
-        return route;
+        return null;
     }
-    */
 
     public StreetMap(String mapFile, int numCars) {
+        // Intersections
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -80,6 +68,11 @@ public class StreetMap {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-
+        // Cars
+        cars = new Car[numCars];
+        for (Car car : cars) {
+            car = new Car((int) (Math.random() * intersections.size()), (int) (Math.random() * intersections.size()));
+            car.setRoute(calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]));
+        }
     }
 }
