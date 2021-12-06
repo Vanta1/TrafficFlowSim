@@ -10,6 +10,10 @@ public class Car {
         startRoute[1] = endNode;
     }
 
+    public void setStartRoute(int[] startRoute) {
+        this.startRoute = startRoute;
+    }
+
     public void setRoute(ArrayList<Integer> newRoute) {
         route = newRoute;
     }

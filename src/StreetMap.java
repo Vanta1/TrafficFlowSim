@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 public class StreetMap {
     Car[] cars;
     ArrayList<Intersection> intersections = new ArrayList<Intersection>();
+    private boolean calculatingRoute = true;
 
     public Intersection getInterecionById(int id) {
         for (Intersection intersection : intersections) {
@@ -27,13 +28,40 @@ public class StreetMap {
 
     // TODO: pathfinding function here
     public ArrayList<Integer> calculateRoute(int startId, int endId) {
+        calculatingRoute = false;
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
         while (true) {
-
-
+            ArrayList<IntersectionAsNode> tempNodes = new ArrayList<>();
+            for (IntersectionAsNode node : nodes) {
+                ArrayList<int[]> curNodeConnections = this.getInterecionById(node.getId()).getConnections();
+                for (int[] connection : curNodeConnections) {
+                    boolean nodeAdded = false;
+                    for (IntersectionAsNode parentCheckNode : nodes) {
+                        if (parentCheckNode.getId() == connection[0]) nodeAdded = true;
+                    }
+                    if (!nodeAdded) {
+                        tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                    }
+                }
+            }
+            nodes.addAll(tempNodes);
+            break;
         }
-        return null;
+        for (IntersectionAsNode node : nodes) {
+            System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
+        }
+        System.out.println(" ");
+        return new ArrayList<>();
+    }
+
+    public void startCars(int numCars) {
+        calculatingRoute = false;
+        cars = new Car[numCars];
+        for (Car car : cars) {
+            car = new Car((int) (Math.random() * intersections.size()), (int) (Math.random() * intersections.size()));
+            car.setRoute(calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]));
+        }
     }
 
     public StreetMap(String mapFile, int numCars) {
@@ -69,10 +97,6 @@ public class StreetMap {
             e.printStackTrace();
         }
         // Cars
-        cars = new Car[numCars];
-        for (Car car : cars) {
-            car = new Car((int) (Math.random() * intersections.size()), (int) (Math.random() * intersections.size()));
-            car.setRoute(calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]));
-        }
+        startCars(numCars);
     }
 }
