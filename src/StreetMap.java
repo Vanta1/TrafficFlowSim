@@ -1,11 +1,3 @@
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,11 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
-import org.w3c.dom.Document;
-
 public class StreetMap {
     Car[] cars;
-    ArrayList<Intersection> intersections = new ArrayList<Intersection>();
+    ArrayList<Intersection> intersections = new ArrayList<>();
     private boolean calculatingRoute = true;
 
     public Intersection getInterecionById(int id) {
@@ -29,7 +19,6 @@ public class StreetMap {
         return null;
     }
 
-    // TODO: pathfinding function here
     public ArrayList<Integer> calculateRoute(int startId, int endId) {
         calculatingRoute = false;
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
@@ -95,7 +84,7 @@ public class StreetMap {
             }
         }
         Collections.reverse(route);
-        System.out.println("\n" + route.toString());
+        System.out.println("\n" + route);
         System.out.println(" ");
         return route;
     }
@@ -124,7 +113,7 @@ public class StreetMap {
             }
             for (String intersection : mapData) {
                 ArrayList<String> data = new ArrayList<>(Arrays.asList(intersection.split("\\.")));
-                if (data.get(0).toString().charAt(0) != ('*')) {
+                if (data.get(0).charAt(0) != ('*')) {
                     this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
                     for (String connection : data) {
                         if (connection.length() == 1) {
