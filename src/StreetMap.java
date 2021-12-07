@@ -115,7 +115,7 @@ public class StreetMap {
     }
 
     public StreetMap(String mapFile, int numCars) {
-        // Intersections2
+        // Intersections
         try {
             Scanner fileScanner = new Scanner(new File(mapFile));
             ArrayList<String> mapData = new ArrayList<>();
@@ -124,8 +124,7 @@ public class StreetMap {
             }
             for (String intersection : mapData) {
                 ArrayList<String> data = new ArrayList<>(Arrays.asList(intersection.split("\\.")));
-                System.out.println(data.get(0));
-                if (!data.get(0).equals("*")) {
+                if (data.get(0).toString().charAt(0) != ('*')) {
                     this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
                     for (String connection : data) {
                         if (connection.length() == 1) {
@@ -139,39 +138,13 @@ public class StreetMap {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /*
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);ap>
-Exception in thread "main" ja
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse(new File(mapFile));
-            document.getDocumentElement().normalize();
-
-            NodeList docIntersections = document.getElementsByTagName("intersec");
-
-            for (int i = 0; i < docIntersections.getLength(); i++) {
-                this.intersections.add(new Intersection(Integer.parseInt( // add an intersection for each intersection in xml file
-                        docIntersections.item(i)
-                                .getAttributes()
-                                .getNamedItem("id")
-                                .getNodeValue()
-                )));
-                NodeList connections = docIntersections.item(i).getChildNodes();
-                for (int n = 0; n < connections.getLength(); n++) {
-                    if (connections.item(n).getNodeType() != Node.ELEMENT_NODE)
-                        continue;
-                    Element curElement = (Element) connections.item(n);
-                    Node targetNode = curElement.getElementsByTagName("target").item(0).getChildNodes().item(0);
-                    Node lengthNode = curElement.getElementsByTagName("length").item(0).getChildNodes().item(0);
-                    int[] conTemp = {Integer.parseInt(targetNode.getNodeValue()), Integer.parseInt(lengthNode.getNodeValue())};
-                    this.intersections.get(i).addConnection(conTemp);
-                }
+        for (Intersection intersection : intersections) {
+            System.out.print(intersection.getId() + " : ");
+            for (int[] connection : intersection.getConnections()) {
+                System.out.print(connection[0] + " -> " + connection[1] + ", ");
             }
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
+            System.out.println();
         }
-        */
         // Cars
         startCars(numCars);
     }
