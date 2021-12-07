@@ -16,6 +16,10 @@ public class IntersectionAsNode {
         return visited;
     }
 
+    public void setVisited(boolean visited) {
+        this.visited = visited;
+    }
+
     public int getParentId() {
         return parentId;
     }

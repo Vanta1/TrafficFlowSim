@@ -31,23 +31,52 @@ public class StreetMap {
         calculatingRoute = false;
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
+        System.out.println("S: " + startId + " E: " + endId);
         while (true) {
             ArrayList<IntersectionAsNode> tempNodes = new ArrayList<>();
+            ArrayList<IntersectionAsNode> removeNodes = new ArrayList<>();
+            int closestUnexplored = Integer.MAX_VALUE;
+            int closestFoundNodeId = -2;
+            for (IntersectionAsNode shortestCheck : nodes) {
+                if (shortestCheck.getConnectLength() < closestUnexplored && !shortestCheck.getVisited()) {
+                    closestUnexplored = shortestCheck.getConnectLength();
+                    closestFoundNodeId = shortestCheck.getId();
+                }
+            }
+            if (closestFoundNodeId == -2) { break; }
             for (IntersectionAsNode node : nodes) {
-                ArrayList<int[]> curNodeConnections = this.getInterecionById(node.getId()).getConnections();
-                for (int[] connection : curNodeConnections) {
+                if (node.getId() !=  closestFoundNodeId) {
+                    continue;
+                }
+                node.setVisited(true);
+                ArrayList<int[]> connections = this.getInterecionById(node.getId()).getConnections();
+                for (int[] connection : connections) {
+                    if (connection[0] == node.getId()) {
+                        continue;
+                    }
                     boolean nodeAdded = false;
-                    for (IntersectionAsNode parentCheckNode : nodes) {
-                        if (parentCheckNode.getId() == connection[0]) nodeAdded = true;
+                    for (IntersectionAsNode addedNodeCheck : nodes) {
+                        if (connection[0] == addedNodeCheck.getId()) {
+                            nodeAdded = true;
+                            if ((connection[1] + node.getConnectLength()) < addedNodeCheck.getConnectLength()) {
+                                removeNodes.add(addedNodeCheck);
+                                tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                            }
+                        }
                     }
                     if (!nodeAdded) {
                         tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
                     }
                 }
             }
+            nodes.removeAll(removeNodes);
             nodes.addAll(tempNodes);
-            break;
-        }
+            if (tempNodes.size() != 0) {
+                if (tempNodes.get(0).getId() == endId) {
+                    break;
+                }
+            }
+         }
         for (IntersectionAsNode node : nodes) {
             System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
         }
@@ -59,7 +88,12 @@ public class StreetMap {
         calculatingRoute = false;
         cars = new Car[numCars];
         for (Car car : cars) {
-            car = new Car((int) (Math.random() * intersections.size()), (int) (Math.random() * intersections.size()));
+            int[] temp = {(int) (Math.random() * (intersections.size())), (int) (Math.random() * (intersections.size()))};
+            while (temp[0] == temp[1]) {
+                temp[0] = (int) (Math.random() * (intersections.size()));
+                temp[1] = (int) (Math.random() * (intersections.size()));
+            }
+            car = new Car(temp[0], temp[1]);
             car.setRoute(calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]));
         }
     }
