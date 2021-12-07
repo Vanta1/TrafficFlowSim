@@ -9,6 +9,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Scanner;
 
 import org.w3c.dom.Document;
 
@@ -80,8 +83,21 @@ public class StreetMap {
         for (IntersectionAsNode node : nodes) {
             System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
         }
+        ArrayList<Integer> route = new ArrayList<>();
+        int currentId = endId;
+        while (currentId != -1) {
+            for (IntersectionAsNode routeNode : nodes) {
+                if (routeNode.getId() == currentId) {
+                    route.add(currentId);
+                    currentId = routeNode.getParentId();
+                    break;
+                }
+            }
+        }
+        Collections.reverse(route);
+        System.out.println("\n" + route.toString());
         System.out.println(" ");
-        return new ArrayList<>();
+        return route;
     }
 
     public void startCars(int numCars) {
@@ -99,10 +115,35 @@ public class StreetMap {
     }
 
     public StreetMap(String mapFile, int numCars) {
-        // Intersections
+        // Intersections2
+        try {
+            Scanner fileScanner = new Scanner(new File(mapFile));
+            ArrayList<String> mapData = new ArrayList<>();
+            while (fileScanner.hasNext()) {
+                mapData.add(fileScanner.nextLine());
+            }
+            for (String intersection : mapData) {
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(intersection.split("\\.")));
+                System.out.println(data.get(0));
+                if (!data.get(0).equals("*")) {
+                    this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
+                    for (String connection : data) {
+                        if (connection.length() == 1) {
+                            continue;
+                        }
+                        int[] conTemp = {Integer.parseInt(connection.split(",")[0]), Integer.parseInt(connection.split(",")[1])};
+                        this.getInterecionById(Integer.parseInt(data.get(0))).addConnection(conTemp);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /*
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);ap>
+Exception in thread "main" ja
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new File(mapFile));
             document.getDocumentElement().normalize();
@@ -130,6 +171,7 @@ public class StreetMap {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
+        */
         // Cars
         startCars(numCars);
     }
