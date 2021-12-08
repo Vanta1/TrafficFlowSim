@@ -19,8 +19,7 @@ public class StreetMap {
         return null;
     }
 
-    public ArrayList<Integer> calculateRoute(int startId, int endId) {
-        calculatingRoute = false;
+    public ArrayList<ArrayList<Integer>> calculateRoute(int startId, int endId) {
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
         System.out.println("S: " + startId + " E: " + endId);
@@ -68,15 +67,19 @@ public class StreetMap {
                     break;
                 }
             }
-         }
+        }
         for (IntersectionAsNode node : nodes) {
             System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
         }
         ArrayList<Integer> route = new ArrayList<>();
+        int routeLength = 0;
         int currentId = endId;
         while (currentId != -1) {
             for (IntersectionAsNode routeNode : nodes) {
                 if (routeNode.getId() == currentId) {
+                    if (currentId == endId) {
+                        routeLength = routeNode.getConnectLength();
+                    }
                     route.add(currentId);
                     currentId = routeNode.getParentId();
                     break;
@@ -85,12 +88,17 @@ public class StreetMap {
         }
         Collections.reverse(route);
         System.out.println("\n" + route);
+        System.out.println("L: " + routeLength);
         System.out.println(" ");
-        return route;
+        ArrayList<ArrayList<Integer>> tempRoute = new ArrayList<>();
+        tempRoute.add(route);
+        ArrayList<Integer> moreTempStuff = new ArrayList<>();
+        moreTempStuff.add(routeLength);
+        tempRoute.add(moreTempStuff);
+        return tempRoute;
     }
 
     public void startCars(int numCars) {
-        calculatingRoute = false;
         cars = new Car[numCars];
         for (Car car : cars) {
             int[] temp = {(int) (Math.random() * (intersections.size())), (int) (Math.random() * (intersections.size()))};
@@ -98,8 +106,9 @@ public class StreetMap {
                 temp[0] = (int) (Math.random() * (intersections.size()));
                 temp[1] = (int) (Math.random() * (intersections.size()));
             }
-            car = new Car(temp[0], temp[1]);
-            car.setRoute(calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]));
+            car = new Car(temp[0], temp[1], 0);
+            ArrayList<ArrayList<Integer>> tempRoute = calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]);
+            car.setRoute(tempRoute.get(0), tempRoute.get(1).get(0));
         }
     }
 
