@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.Scanner;
 
 public class StreetMap {
-    Car[] cars;
+    ArrayList<Car> cars;
     ArrayList<Intersection> intersections = new ArrayList<>();
-    private boolean calculatingRoute = true;
+    private float routeAverage;
 
     public Intersection getInterecionById(int id) {
         for (Intersection intersection : intersections) {
@@ -19,7 +19,21 @@ public class StreetMap {
         return null;
     }
 
-    public ArrayList<ArrayList<Integer>> calculateRoute(int startId, int endId) {
+    private void calculateAverageRouteLength(ArrayList<Car> cars) {
+        float routeAverage = 0;
+        for (Car car : cars) {
+            routeAverage += (float) car.getRouteLength();
+        }
+        routeAverage = routeAverage / (float) cars.size();
+        this.routeAverage = routeAverage;
+        System.out.println(routeAverage);
+    }
+
+    public ArrayList<Car> getCars() {
+        return cars;
+    }
+
+    private ArrayList<ArrayList<Integer>> calculateRoute(int startId, int endId) {
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
         System.out.println("S: " + startId + " E: " + endId);
@@ -98,18 +112,19 @@ public class StreetMap {
         return tempRoute;
     }
 
-    public void startCars(int numCars) {
-        cars = new Car[numCars];
+    private void startCars(int numCars) {
+        cars = new ArrayList<>(Collections.nCopies(numCars, new Car()));
         for (Car car : cars) {
             int[] temp = {(int) (Math.random() * (intersections.size())), (int) (Math.random() * (intersections.size()))};
             while (temp[0] == temp[1]) {
                 temp[0] = (int) (Math.random() * (intersections.size()));
                 temp[1] = (int) (Math.random() * (intersections.size()));
             }
-            car = new Car(temp[0], temp[1], 0);
+            car.setStartRoute(temp);
             ArrayList<ArrayList<Integer>> tempRoute = calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]);
             car.setRoute(tempRoute.get(0), tempRoute.get(1).get(0));
         }
+        calculateAverageRouteLength(cars);
     }
 
     public StreetMap(String mapFile, int numCars) {

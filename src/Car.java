@@ -6,12 +6,19 @@ public class Car {
     private int routeLength = 0;
     private int accel;
 
-    public Car(int startNode, int endNode, int accel) {
-        this.startRoute = new int[2];
-        this.startRoute[0] = startNode;
-        this.startRoute[1] = endNode;
+    public void setRoute(ArrayList<Integer> route) {
+        this.route = route;
+    }
+
+    public void setRouteLength(int routeLength) {
+        this.routeLength = routeLength;
+    }
+
+    public void setAccel(int accel) {
         this.accel = accel;
     }
+
+    public Car() {  }
 
     public void setStartRoute(int[] startRoute) {
         this.startRoute = startRoute;
