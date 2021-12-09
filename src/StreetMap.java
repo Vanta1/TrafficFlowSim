@@ -166,6 +166,21 @@ public class StreetMap {
         return tempRoute;
     }
 
+    // https://stackoverflow.com/questions/7708698/convert-arrayliststring-to-an-arraylistinteger-or-integer-array
+    private ArrayList<Integer> getIntegerArray(ArrayList<String> stringArray) {
+        ArrayList<Integer> result = new ArrayList<>();
+        for(String stringValue : stringArray) {
+            try {
+                //Convert String to Integer, and store it into integer array list.
+                result.add(Integer.parseInt(stringValue));
+            } catch(NumberFormatException e) {
+                //System.out.println("Could not parse " + nfe);
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
     public StreetMap(String mapFile, int numCars, boolean robustOutput) {
         this.robustOutput = robustOutput;
         // Intersections
@@ -175,16 +190,22 @@ public class StreetMap {
             while (fileScanner.hasNext()) {
                 mapData.add(fileScanner.nextLine());
             }
+            ArrayList<Integer> superblockNodes = new ArrayList<>();
             for (String intersection : mapData) {
                 ArrayList<String> data = new ArrayList<>(Arrays.asList(intersection.split("\\.")));
-                if (data.get(0).charAt(0) != ('*')) {
-                    this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
-                    for (String connection : data) {
-                        if (connection.split(",").length == 1) {
-                            continue;
+                if (data.get(0).charAt(0) != '*') {
+                    if (data.get(0).charAt(0) == '%') {
+                        data.remove(0);
+                        superblockNodes.addAll(getIntegerArray(data));
+                    } else {
+                        this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
+                        for (String connection : data) {
+                            if (connection.split(",").length == 1) {
+                                continue;
+                            }
+                            int[] conTemp = {Integer.parseInt(connection.split(",")[0]), Integer.parseInt(connection.split(",")[1])};
+                            this.getInterecionById(Integer.parseInt(data.get(0))).addConnection(conTemp);
                         }
-                        int[] conTemp = {Integer.parseInt(connection.split(",")[0]), Integer.parseInt(connection.split(",")[1])};
-                        this.getInterecionById(Integer.parseInt(data.get(0))).addConnection(conTemp);
                     }
                 }
             }
