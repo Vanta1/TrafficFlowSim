@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +10,9 @@ import java.util.stream.Collectors;
 public class StreetMap {
     ArrayList<Car> cars;
     ArrayList<Intersection> intersections = new ArrayList<>();
-    private float routeAverage;
-    private boolean robustOutput;
+    private ArrayList<Integer> superblockNodes = new ArrayList<>();
+    private final boolean robustOutput;
+    private FileWriter dataOut;
 
     public Intersection getInterecionById(int id) {
         for (Intersection intersection : intersections) {
@@ -25,6 +27,11 @@ public class StreetMap {
         System.out.println("Average Route Length: " +  calculateAverageRouteLength(this.cars));
         System.out.println("Average Number of Stops: " + calculateAverageNumberOfStops(this.cars));
         System.out.println("Average Travel Time: " + calculateAverageTravelTime(this.cars));
+        try {
+            this.dataOut.write(calculateAverageRouteLength(this.cars) + "," + calculateAverageNumberOfStops(this.cars) + "," + calculateAverageTravelTime(this.cars) + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private float calculateAverageNumberOfStops(ArrayList<Car> cars) {
@@ -84,6 +91,8 @@ public class StreetMap {
     private ArrayList<ArrayList<Integer>> calculateRoute(int startId, int endId) {
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
+        boolean entersSuperblock = this.superblockNodes.contains(endId);
+        System.out.println(entersSuperblock);
         if (robustOutput) {
             System.out.println("S: " + startId + " E: " + endId);
         }
@@ -115,12 +124,28 @@ public class StreetMap {
                             nodeAdded = true;
                             if ((connection[1] + node.getConnectLength()) < addedNodeCheck.getConnectLength()) {
                                 removeNodes.add(addedNodeCheck);
-                                tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                                if (superblockNodes.contains(connection[0])) {
+                                    if (entersSuperblock) {
+                                        tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                                    } else {
+                                        tempNodes.add(new IntersectionAsNode(connection[0], Integer.MAX_VALUE, node.getId()));
+                                    }
+                                } else {
+                                    tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                                }
                             }
                         }
                     }
                     if (!nodeAdded) {
-                        tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                        if (superblockNodes.contains(connection[0])) {
+                            if (entersSuperblock) {
+                                tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                            } else {
+                                tempNodes.add(new IntersectionAsNode(connection[0], Integer.MAX_VALUE, node.getId()));
+                            }
+                        } else {
+                            tempNodes.add(new IntersectionAsNode(connection[0], connection[1] + node.getConnectLength(), node.getId()));
+                        }
                     }
                 }
             }
@@ -181,8 +206,9 @@ public class StreetMap {
         return result;
     }
 
-    public StreetMap(String mapFile, int numCars, boolean robustOutput) {
+    public StreetMap(String mapFile, int numCars, boolean robustOutput, FileWriter dataOut) {
         this.robustOutput = robustOutput;
+        this.dataOut = dataOut;
         // Intersections
         try {
             Scanner fileScanner = new Scanner(new File(mapFile));
@@ -190,13 +216,13 @@ public class StreetMap {
             while (fileScanner.hasNext()) {
                 mapData.add(fileScanner.nextLine());
             }
-            ArrayList<Integer> superblockNodes = new ArrayList<>();
+            ArrayList<Integer> superblockNodesTemp = new ArrayList<>();
             for (String intersection : mapData) {
                 ArrayList<String> data = new ArrayList<>(Arrays.asList(intersection.split("\\.")));
                 if (data.get(0).charAt(0) != '*') {
                     if (data.get(0).charAt(0) == '%') {
                         data.remove(0);
-                        superblockNodes.addAll(getIntegerArray(data));
+                        superblockNodesTemp.addAll(getIntegerArray(data));
                     } else {
                         this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
                         for (String connection : data) {
@@ -209,6 +235,7 @@ public class StreetMap {
                     }
                 }
             }
+            this.superblockNodes = superblockNodesTemp;
         } catch (IOException e) {
             e.printStackTrace();
         }
