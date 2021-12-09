@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Car {
     private ArrayList<Integer> route;
     private int[] startRoute;
-    private int routeLength = 0;
+    private int routeLength;
     private int accel;
 
     public void setRoute(ArrayList<Integer> route) {
@@ -18,7 +18,16 @@ public class Car {
         this.accel = accel;
     }
 
-    public Car() {  }
+    public Car() {
+        this.route = new ArrayList<>();
+        this.startRoute = new int[2];
+        this.routeLength = 0;
+        this.accel = 0;
+    }
+
+    public ArrayList<Integer> getRoute() {
+        return route;
+    }
 
     public void setStartRoute(int[] startRoute) {
         this.startRoute = startRoute;

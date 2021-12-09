@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class StreetMap {
     ArrayList<Car> cars;
     ArrayList<Intersection> intersections = new ArrayList<>();
     private float routeAverage;
+    private boolean robustOutput;
 
     public Intersection getInterecionById(int id) {
         for (Intersection intersection : intersections) {
@@ -19,24 +21,72 @@ public class StreetMap {
         return null;
     }
 
-    private void calculateAverageRouteLength(ArrayList<Car> cars) {
+    private void outputData() {
+        System.out.println("Average Route Length: " +  calculateAverageRouteLength(this.cars));
+        System.out.println("Average Number of Stops: " + calculateAverageNumberOfStops(this.cars));
+        System.out.println("Average Travel Time: " + calculateAverageTravelTime(this.cars));
+    }
+
+    private float calculateAverageNumberOfStops(ArrayList<Car> cars) {
+        int stopsAverage = 0;
+        for (Car car : cars) {
+            stopsAverage += car.getRoute().size();
+        }
+        return (float) stopsAverage / (float) cars.size();
+    }
+
+    private float calculateAverageRouteLength(ArrayList<Car> cars) {
         float routeAverage = 0;
         for (Car car : cars) {
             routeAverage += (float) car.getRouteLength();
         }
-        routeAverage = routeAverage / (float) cars.size();
-        this.routeAverage = routeAverage;
-        System.out.println(routeAverage);
+        return routeAverage / (float) cars.size();
+    }
+
+    private float calculateAverageTravelTime(ArrayList<Car> cars) {
+        float timeAverage = 0;
+        float curTime;
+        for (Car car : cars) {
+            curTime = 0;
+            for (int i = 0; i < car.getRoute().size()-1; i++) {
+                int finalI = i;
+                curTime += (Math.sqrt((2 * (((float) this.getInterecionById(car.getRoute().get(i))
+                        .getConnections()
+                        .stream()
+                        .filter(ls -> ls[0] == car.getRoute().get(finalI +1))
+                        .collect(Collectors.toList()).get(0)[1]) * ((float)40/3)) / 3)));
+            }
+            timeAverage += curTime;
+        }
+        return timeAverage / (float) cars.size();
     }
 
     public ArrayList<Car> getCars() {
         return cars;
     }
 
+    private void startCars(int numCars) {
+        cars = new ArrayList<>(Collections.nCopies(numCars, null));
+        for (int i = 0; i < cars.size(); i++) {
+            cars.set(i, new Car());
+            int[] temp = {(int) (Math.random() * (intersections.size())), (int) (Math.random() * (intersections.size()))};
+            while (temp[0] == temp[1]) {
+                temp[0] = (int) (Math.random() * (intersections.size()));
+                temp[1] = (int) (Math.random() * (intersections.size()));
+            }
+            cars.get(i).setStartRoute(temp);
+            ArrayList<ArrayList<Integer>> tempRoute = calculateRoute(cars.get(i).getStartRoute()[0], cars.get(i).getStartRoute()[1]);
+            cars.get(i).setRoute(tempRoute.get(0), tempRoute.get(1).get(0));
+        }
+        outputData();
+    }
+
     private ArrayList<ArrayList<Integer>> calculateRoute(int startId, int endId) {
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
-        System.out.println("S: " + startId + " E: " + endId);
+        if (robustOutput) {
+            System.out.println("S: " + startId + " E: " + endId);
+        }
         while (true) {
             ArrayList<IntersectionAsNode> tempNodes = new ArrayList<>();
             ArrayList<IntersectionAsNode> removeNodes = new ArrayList<>();
@@ -82,8 +132,10 @@ public class StreetMap {
                 }
             }
         }
-        for (IntersectionAsNode node : nodes) {
-            System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
+        if (robustOutput) {
+            for (IntersectionAsNode node : nodes) {
+                System.out.println(node.getId() + " " + node.getConnectLength() + " " + node.getParentId());
+            }
         }
         ArrayList<Integer> route = new ArrayList<>();
         int routeLength = 0;
@@ -101,9 +153,11 @@ public class StreetMap {
             }
         }
         Collections.reverse(route);
-        System.out.println("\n" + route);
-        System.out.println("L: " + routeLength);
-        System.out.println(" ");
+        if (robustOutput) {
+            System.out.println("\n" + route);
+            System.out.println("L: " + routeLength);
+            System.out.println(" ");
+        }
         ArrayList<ArrayList<Integer>> tempRoute = new ArrayList<>();
         tempRoute.add(route);
         ArrayList<Integer> moreTempStuff = new ArrayList<>();
@@ -112,22 +166,8 @@ public class StreetMap {
         return tempRoute;
     }
 
-    private void startCars(int numCars) {
-        cars = new ArrayList<>(Collections.nCopies(numCars, new Car()));
-        for (Car car : cars) {
-            int[] temp = {(int) (Math.random() * (intersections.size())), (int) (Math.random() * (intersections.size()))};
-            while (temp[0] == temp[1]) {
-                temp[0] = (int) (Math.random() * (intersections.size()));
-                temp[1] = (int) (Math.random() * (intersections.size()));
-            }
-            car.setStartRoute(temp);
-            ArrayList<ArrayList<Integer>> tempRoute = calculateRoute(car.getStartRoute()[0], car.getStartRoute()[1]);
-            car.setRoute(tempRoute.get(0), tempRoute.get(1).get(0));
-        }
-        calculateAverageRouteLength(cars);
-    }
-
-    public StreetMap(String mapFile, int numCars) {
+    public StreetMap(String mapFile, int numCars, boolean robustOutput) {
+        this.robustOutput = robustOutput;
         // Intersections
         try {
             Scanner fileScanner = new Scanner(new File(mapFile));
@@ -140,7 +180,7 @@ public class StreetMap {
                 if (data.get(0).charAt(0) != ('*')) {
                     this.intersections.add(new Intersection(Integer.parseInt(data.get(0))));
                     for (String connection : data) {
-                        if (connection.length() == 1) {
+                        if (connection.split(",").length == 1) {
                             continue;
                         }
                         int[] conTemp = {Integer.parseInt(connection.split(",")[0]), Integer.parseInt(connection.split(",")[1])};
@@ -151,12 +191,14 @@ public class StreetMap {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (Intersection intersection : intersections) {
-            System.out.print(intersection.getId() + " : ");
-            for (int[] connection : intersection.getConnections()) {
-                System.out.print(connection[0] + " -> " + connection[1] + ", ");
+        if (robustOutput) {
+            for (Intersection intersection : intersections) {
+                System.out.print(intersection.getId() + " : ");
+                for (int[] connection : intersection.getConnections()) {
+                    System.out.print(connection[0] + " -> " + connection[1] + ", ");
+                }
+                System.out.println();
             }
-            System.out.println();
         }
         // Cars
         startCars(numCars);

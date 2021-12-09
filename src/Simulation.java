@@ -2,9 +2,6 @@ import java.util.Scanner;
 
 public class Simulation {
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        StreetMap streetMap = new StreetMap(args[0], Integer.parseInt(args[1]));
-        System.out.println("Looking good!");
-        scan.close();
+        StreetMap streetMap = new StreetMap(args[1], Integer.parseInt(args[2]), args[0].equals("r"));
     }
 }
