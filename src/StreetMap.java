@@ -61,7 +61,7 @@ public class StreetMap {
                         .getConnections()
                         .stream()
                         .filter(ls -> ls[0] == car.getRoute().get(finalI +1))
-                        .collect(Collectors.toList()).get(0)[1]) * ((float)40/3)) / 3)));
+                        .collect(Collectors.toList()).get(0)[1]) * ((float)40/3)) / 0.5)));
             }
             timeAverage += curTime;
         }
@@ -92,7 +92,6 @@ public class StreetMap {
         ArrayList<IntersectionAsNode> nodes = new ArrayList<>();
         nodes.add(new IntersectionAsNode(startId, 0, -1));
         boolean entersSuperblock = this.superblockNodes.contains(endId);
-        System.out.println(entersSuperblock);
         if (robustOutput) {
             System.out.println("S: " + startId + " E: " + endId);
         }
